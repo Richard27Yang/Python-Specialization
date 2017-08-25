@@ -1,0 +1,151 @@
+So now what we're going to
+do is write a bit of code. And we're going to write code that
+implements the many-to-many relationship. And so, if you recall from before,
+a many-to-many relationship is a situation where you have many courses on one
+side and many users on the other side. And there is many users that
+are members of many courses, and a particular user can also be
+members of lots of courses. So there's many on both sides. And we don't have a way in a database to
+really represent this directly, so we make this thing that Wikipedia
+calls a junction table. I don't know, I call it
+a many-to-many table. And what we do is we decompose
+the many-to-many relationship into a pair of many-to-one relationships. So you create this table that is the join
+table, the table to connect them together. And it effectively has two
+foreign keys that point outwards. And then you can also
+model certain things. So sometimes you, in this case, we
+would model the role of the student or your teacher or whatever. So you're a member the course but
+there's something about your membership. And there's sometimes a few other
+things that are sort of down here on this connection. But you have two foreign keys and what's also interesting is
+there is no primary key, right? No primary key. And that's because we
+create a composite key that is the combination
+of these two things. So we basically say user_id and
+course_id together. So 1, 1;, 1, 2; 1, 3. Any combination of those numbers
+is itself a primary key. We call that a composite key. Okay? So what we're going to do is we're going to talk
+about how we will insert data into a user table, insert data into the course table, and then insert data into this
+connector table, okay? So let's take a look at the code. And what we're going to do is
+we're going to actually in this case, instead of reading XML or reading from the Web, we're actually
+going to read some JSON data that I provide. And what this is,
+is this is JSON that's a list of a list. So each list here is a name,
+a course, and a role. And so this is the instructor of si110,
+this is a student in si110, and if you scroll down,
+you see then sooner or later, after a while, we have si106 and
+then we have the instructor of si106. So we're going to write
+a bit of code that reads this JSON data, parses the JSON data, and then loops through what effectively
+are JSON records one at a time. Inserting into the User table,
+inserting into the Course table and then using the foreign key to
+connect these things together, okay? So Charley is on one side,
+si110 is on the other side, and then we have to make the connection. So what we really have to do is establish
+a primary key in the User table for Charley. Establish a primary key for
+si110 in the Course table. And then we just insert a single row.
+which is pretty simple and pretty easy. Okay, so let's take a look at the code. Here's the code, roster.py. Now some of these things are going to
+look pretty comfortable by now. We import the json library,
+import sqlite3 library. We make a connection to
+the database rosterdb.sqlite. And we get a cursor so
+we can send commands. So this next bit is a little bit
+different than we usually do. Usually we say cur.execute but this time
+we're going to say executescript. And that's the difference,
+we're saying executescript. And this is a triple-quoted string, so
+that's one long string with newlines and all that stuff. And what we're able to do in executescript
+is have multiple SQL commands. And so we can say DROP TABLE IF EXISTS,
+DROP TABLE IF EXISTS. What we're doing here is, we don't want to have to delete this
+file every time we restart, so we want to start with fresh tables so
+we can drop them and recreate them. And drop if exist means the first time
+when you first create it, it won't exist, so this does absolutely nothing. But by the time we get here
+those three tables will be gone. We're going to create a User table and the only thing we're doing different than
+we usually do is we've added this UNIQUE. So what this basically says is within the
+table User the name column must be unique. So there can't be two rows that have
+the word Chuck in them for the name. And this is a rule that we're making for
+ourselves. And if we violate the rule SQLite will
+yell at us, or fail, or whatever. Now in a bit,
+we're going to use this to our advantage. And so the same thing is true for
+the course. We got a primary key and then we got
+a logical key that we're basically saying the title of the course must be unique. And then we have our
+little connector table. Our junction table connector table
+and it has two foreign keys that look just like
+every foreign key we've ever made except what we're saying here is
+PRIMARY KEY user_id, course_id. So we're saying we have
+a composite primary key here. that is the combination.
+So 1, 1 or 2, 1 or 2, 1. It's like these are concatenated
+together to make a unique key. So neither of these two
+is the primary key. But the primary key for the row
+is user_id course_id combination. And this is also
+a uniqueness constraint so that we can't doubly
+insert this stuff as well. Okay? So that,
+when we're all done with that, we've got three tables set up
+the way we want them to be, okay? Okay, so we ask for a filename, we if hit
+Enter, it's going to be roster_data.json, probably you'll just hit
+Enter on this all the time. This is kind of the syntax of that file. We're going to open the file,
+we're going to read the whole thing, get that into string,
+we're going to loads it. You could put try/excepts around here but
+hey, the data's going to work. So it's just going to work. So now json_data is a Python list. So we're saying for entry in json_data. So what that's going to do basically is
+entry is going to iterate through each of these things. So entry then is a three-element array,
+zero, one, and two. And so it's like, oh, the name is entry
+sub zero and the title is entry sub one. So we're pulling the name and
+the title out of this data. We've read it. This is one of the things
+that everyone loves about JSON so much is that the reading it, the parsing it, the looping through it,
+the hunting things down, is very instinctive because it's nothing
+but lists and dictionaries depending on whether the bit of JSON starts with
+a square bracket or a curly bracket. But other than that, it's all good. Then we print the little guy out. Now, this is where we're going to take
+advantage of the UNIQUE constraint. So, we're going to say INSERT OR IGNORE. So, what OR IGNORE really
+in general is saying is if this insert would cause an error,
+do nothing. So it says insert this or ignore it. And the particular thing
+that's going to go wrong here is a violation of the unique constraint
+that we put on the name column. The name column. So INSERT INTO User name. Remember id's a primary key so we don't
+have to say that. And then we have values, question mark. And then we have a little tuple with one
+little extra comma guy, sorry about that syntax but that's what we gotta do. So what this does is if this is
+the first time we've seen name, it inserts it and
+gives that a primary key. If it's the second or later,
+it doesn't insert it. We're kind of like behaving like
+a dictionary like we did in some of the other database programs. So this either inserts or does nothing. But what we're sure of at this point,
+from this point forward, we know that there's a record and
+a primary key. So now what we're going to do is we're
+going to look up that primary key and say what was the primary key, either given immediately one
+statement earlier or a long time ago. Whatever it is, select the primary
+key FROM User WHERE name equals name. And so, we insert it or ignore it,
+then we do a select, this little, this almost become an idiom by
+the time it's all said and done. This little bit is an INSERT OR IGNORE
+and then SELECT and this says, put it in or not and give me the
+primary key when you're done. Then we just say user_id = cur.fetchone,
+say give me one row from this thing, there should only be one row. And then the sub zero
+element because we only are selecting one column
+from the database. Okay. Then we do the exact same thing again. It's an idiom at this point.
+You just grab these three lines and then we paste them down here. Insert or ignore into the Course
+with the title with that's got a UNIQUE constraint on it. And then we're going to do a
+SELECT WHERE. And then we're going to have a nice
+little integer number, which is the primary key of the course,
+whether we just inserted it or not. Okay? So that's in good shape. So at this point we have inserted
+a record here, we've inserted a record there, and we have the value for
+this and this sitting in two variables. Like I've always said, some of these things that you've got to put
+foreign keys in are easier in Python. Because you don't have to write
+down like in a little cheat sheet. Right, here is like
+a little cheat sheet here. Like what are those numbers? Well, we don't need to know
+what those numbers are. Because we have them conveniently
+in variables, course_id, user_id. It says give it to me whatever that number
+is, you don't have to write it down. So we're just going to INSERT OR
+REPLACE, this is because the combination of
+user_id and course_id is a primary key. So if somehow we see the person in
+the course twice, it'll just update it. So it's like this is a combination
+of an insert/update, D-A-T-E. So INSERT OR REPLACE, it's just
+don't blow up if it's already there. INTO Member user_id, course_id,
+two values, and then user_id, course_id. And then we're done. We really have established that little
+connector with the two foreign keys. And then we commit to make
+sure we write it to disk, and then we run this one time for
+each of the things. Okay? So pretty easy, pretty
+straightforward, let's run the code. Okay, so I am in the code/roster and
+so if I take an ls, I have roster.json here and roster.py. And to run the code I just
+say python roster.py. And at this point a database
+has been created because the create, the execute script was before that. So let's take a look at
+the database structure. There is no data in it, so
+let's do an Open Database, rosterdb.sqlite. So we've got these things, they're all
+created exactly the way we wanted. Now you would normally not
+bother stopping and looking but if we take a look at the data
+there is no data in here. Okay? There is no data. And so I'm just going to hit Enter, which means it's going to
+assume the rosterdata.json. Reads all those things, inserts all
+those things, commits all those things. And now we can go back and
+take a look at the data. And there it is,
+the data is already there. Here's all the users in the User table. Simple enough. Courses in the Course table,
+simple enough. Primary keys and then the Member table,
+which is nothing more than a bunch of rows with two primary keys in them pointing to
+the course and to the user on either side. And so there we go. Pretty much that's all we really
+have to do to do to do, let's go up here. To implement this picture of
+a many-to-many relationship that we've decomposed into two
+many-to-one relationships.

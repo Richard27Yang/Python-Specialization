@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<!-- saved from url=(0098)https://pr4e.dr-chuck.com/tsugi/mod/sql-intro/index.php?PHPSESSID=f41ecf9903e8803ede662e5cb823e95f -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>PR4E</title>
+        <!-- Le styles -->
+        <link href="./PR4E_files/bootstrap.min.css" rel="stylesheet">
+        <link href="./PR4E_files/bootstrap-theme.min.css" rel="stylesheet">
+        <link href="./PR4E_files/jquery-ui.min.css" rel="stylesheet">
+        <link href="./PR4E_files/font-awesome.min.css" rel="stylesheet">
+
+    <style>
+    body {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+    .navbar {
+      margin-bottom: 20px;
+    }
+    .container_iframe {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+    </style>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+          <script src="/data/pr4e/public_html/tsugi/vendor/tsugi/php/static/js/html5shiv/html5shiv.js"></script>
+          <script src="/data/pr4e/public_html/tsugi/vendor/tsugi/php/static/js/respond/respond.min.js"></script>
+        <![endif]-->
+
+    <script type="text/javascript" async="" src="./PR4E_files/dc.js"></script><script type="text/javascript">CSRF_TOKEN = "57242f5bd723a";</script>
+<script>var old = null;function asplay_top(c){var audio = document.createElement("audio");if(audio != null && audio.canPlayType && audio.canPlayType("audio/mpeg")){if(old){old.pause();}audio.src = c;old = audio;audio.play();}}</script></head>
+<body>
+<script>
+if (window!=window.top) {
+    document.write('<div class="container_iframe">');
+} else {
+    document.write('<div class="container">');
+}
+</script><div class="container">
+<span style="position: fixed; right: 10px; top: 5px;"><button onclick="$(&#39;#settings&#39;).modal();return false;" type="button" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></button>
+<a href="https://pr4e.dr-chuck.com/tsugi/mod/sql-intro/index.php?PHPSESSID=f41ecf9903e8803ede662e5cb823e95f#" onclick="window.close();" class="btn btn-success">Exit</a>
+</span><div class="modal fade" id="settings">
+  <div class="modal-dialog">
+    <div class="modal-content">
+            <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">Configure        Multi-Table Database - Tracks        </h4>
+      </div><!-- / .modal-header -->
+      <div class="modal-body">
+        <img id="settings_spinner" src="./PR4E_files/spinner.gif" style="display: none">
+        <span id="save_fail" style="display:none; color:red">Unable to save settings</span>
+        <p></p>
+            <p>Exercise is set to Many-to-One SQLITE (Tracks)</p><p>There is currently no due date/time for this assignment.</p>
+      </div><!-- / .modal-body -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div><!-- / .modal-footer -->
+        </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<p>Welcome Yunchao Yang from Using Databases with Python</p>
+<p>
+</p><form name="myform" enctype="multipart/form-data" method="post"><input type="hidden" name="PHPSESSID" value="f41ecf9903e8803ede662e5cb823e95f">
+To get credit for this assignment, perform the instructions below and 
+upload your SQLite3 database here: <br>
+<input name="database" type="file"> 
+(Must have a .sqlite suffix)<br>
+<input type="submit">
+<p>
+You do not need to export or convert the database -  simply upload 
+the <b>.sqlite</b> file that your program creates.  See the example code for
+the use of the <b>connect()</b> statement.
+</p>
+</form>
+<p></p>
+<h1>Musical Track Database</h1>
+<p>
+This application will read an iTunes export file in XML and produce a properly
+normalized database with this structure:
+</p><pre>CREATE TABLE Artist (
+    id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    name    TEXT UNIQUE
+);
+
+CREATE TABLE Genre (
+    id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    name    TEXT UNIQUE
+);
+
+CREATE TABLE Album (
+    id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    artist_id  INTEGER,
+    title   TEXT UNIQUE
+);
+
+CREATE TABLE Track (
+    id  INTEGER NOT NULL PRIMARY KEY 
+        AUTOINCREMENT UNIQUE,
+    title TEXT  UNIQUE,
+    album_id  INTEGER,
+    genre_id  INTEGER,
+    len INTEGER, rating INTEGER, count INTEGER
+);
+</pre>
+<p></p>
+<p>
+If you run the program multiple times in testing or with different files, 
+make sure to empty out the data before each run.
+</p><p>
+You can use this code as a starting point for your application:
+<a href="http://www.pythonlearn.com/code/tracks.zip" target="_blank">
+http://www.pythonlearn.com/code/tracks.zip</a>.  
+The ZIP file contains the <b>Library.xml</b> file to be used for this assignment.
+You can export your own tracks from iTunes and create a database, but
+for the database that you turn in for this assignment, only use the 
+<b>Library.xml</b> data that is provided.
+</p>
+<p>
+To grade this assignment, the program will run a query like this on
+your uploaded database and look for the data it expects to see:
+</p><pre>SELECT Track.title, Artist.name, Album.title, Genre.name 
+    FROM Track JOIN Genre JOIN Album JOIN Artist 
+    ON Track.genre_id = Genre.ID and Track.album_id = Album.id 
+        AND Album.artist_id = Artist.id
+    ORDER BY Artist.name LIMIT 3
+</pre>
+The expected result of this query on your database is:
+<p></p><table border="2">
+<tbody><tr>
+<th>Track</th><th>Artist</th><th>Album</th><th>Genre</th>
+</tr>
+<tr><td>Chase the Ace</td><td>AC/DC</td><td>Who Made Who</td><td>Rock</td></tr><tr>
+</tr><tr><td>D.T.</td><td>AC/DC</td><td>Who Made Who</td><td>Rock</td></tr><tr>
+</tr><tr><td>For Those About To Rock (We Salute You)</td><td>AC/DC</td><td>Who Made Who</td><td>Rock</td></tr><tr>
+
+<script src="./PR4E_files/jquery-1.11.3.js"></script>
+<script src="./PR4E_files/bootstrap.min.js"></script>
+<script src="./PR4E_files/jquery-ui.min.js"></script>
+<script src="./PR4E_files/handlebars-v4.0.2.js"></script>
+<script src="./PR4E_files/tsugiscripts.js"></script>
+    <script type="text/javascript">
+    HEARTBEAT_URL = 'https://pr4e.dr-chuck.com/tsugi/vendor/tsugi/php/util/heartbeat.php?PHPSESSID=f41ecf9903e8803ede662e5cb823e95f';
+    HEARTBEAT_INTERVAL = setInterval(doHeartBeat, 720000);
+    </script>
+        <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-423997-17']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        // ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        ga.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js';
+
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    _gaq.push(['_setCustomVar', 1, 'consumer_key', 'csev@coursera.org', 2]);
+_gaq.push(['_setCustomVar', 2, 'context_id', '21', 2]);
+_gaq.push(['_setCustomVar', 3, 'context_title', 'Using Databases with Python', 2]);
+</script>
+
+
+
+</tr></tbody></table></div></body></html>

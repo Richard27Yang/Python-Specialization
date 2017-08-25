@@ -1,0 +1,186 @@
+So we've learned about foreign keys. We've learned about JOIN. We've learned about how to normalize
+data to remove duplicates. But there's still one more basic data
+modeling thing that we have to learn about and that's many-to-many relationships. And so everything we've done so
+far is what we call one-to-many. And that is, an album has many tracks. So at the end of these arrows, and
+we see these on some of the crow's foot data model diagrams, one end is like many 
+and then there's one. So one album, and then many tracks. And so, this is the kind of thing
+that we've got. And we've got a foreign
+key in the many side. So that allows there to be many,
+many, many tracks for one album. And then another album would have
+many, many, many tracks. Right? And so that's the idea. There's a set of tracks that have the same
+I mean this is the duplication that we just got rid of and that's called a
+many-to-one or a one-to-many, okay? And so that is one form and
+it's the most common form and we see this in our tables where we
+have genre_id or album_id and we have duplication in here and this is the many
+side so there's many of these things for one of those things. And, as an example of
+biological mother and children, a biological, single biological
+mother might have many children. And this is also a crow's foot diagram. And this little like crow's foot says many,
+and then one shows right there. So when we're drawing
+these data model diagrams, which we haven't spent too much time with, we always draw them in a way so
+that we capture the manyness or the cardinality of each
+end of the relationship. Now, so that's one-to-many. But sometimes we have a relationship
+between data that's many-to-many, and frankly in our music data that we've been
+playing with, I already told you that, like, well there's actually
+many artists on an album. But I said don't worry about that.
+Well now we're going to worry about that. So the example that I took from
+Wikipedia is books and authors. There are many authors and many books. And so, one author may talk to many books, and one book may have different authors
+that they're connected to. And so we can't say that either of these is a
+one relationship, and so we call this a many-to-many. On both ends there's a many-to-many. But in terms of the table that we
+want to do, there is no way. You can't put a single
+foreign key in this side. Oops, come back. We can't put a foreign key in
+this table to point to Books. And we can't put a foreign key in Books
+pointing to Authors because that would be sort of a one on either side. And so we build a table in the
+middle, okay? And in Wikipedia they call it a junction
+table, all kinds of names for this thing, but what we do is we
+have a little table that we create. We still have a Books table and
+a Authors table, but then we have a table that models nothing
+but the connection between them and so we decompose this many-to-many
+relationship into a many-to-one relationship and a many-to-one
+relationship and these two things then we can model properly using the exact
+same techniques that we've been using all along. And so we end up with a table that has two
+foreign keys in it and no primary key. So let's take a look at how this looks
+when we actually build it and model it. So here we're going to have something
+I care a lot about, courses and users. So this has to do with the fact that one
+user is a member of many courses and each course has many users so the
+relationship between courses and users, the member-of relationship,
+is many on both ends. And we just can't model that directly. So we make a little mini-table
+in the middle, right? So we call this the membership table or
+the table called Member. We still have a User table and
+a Course table. And we have a primary key in
+the Course and the User table. And what we do is we have this
+Member table that has each row has two foreign keys. And it is a connection, so if you think
+of all the courses on one side, and all the users on another side, each connection,
+these could be friends of people, each connection has one row that connects a particular
+course with a particular user. And that's how it works. And so then that decomposes
+our many-to-many relationship into two halves of two many-to-ones, that then models the many-to-many
+relationship between the two tables. We don't put an id. We don't put that in there,
+because we can make a composite key, which is, both these two things
+are the primary key for that table. They're both numbers,
+duplication is allowed and so this is all perfectly great. Now sometimes we'll model something like
+put a role here so that you can say okay, this is courses and users. We might indicate that this particular
+user/course combination also is an instructor and this particular
+is a student, right? And so we can sometimes put a little bit
+of extra data on the link itself, and so we have a little bit of data
+that we add down there. Okay? So we make this little table in
+the middle, and so here we're going to run some databases. I'm going to start with
+a fresh database. I'm going to make a User table, the main difference is I'm going
+to give the primary key for the users, I'm going to make a Course table, and
+this is our standard primary key stuff. I'm going to have a name and email for
+the users, and a title for the courses. And then, those are just normal
+things that we're used to doing. But now what we're going to do is
+create this little connector table that's going to have two,
+it's going to have a role_id, and course_id. I mean a user_id and a course_id. And then we're going to model a little bit
+of data, right here in the middle, and we're going to model role. And this is going to allow us to say whether
+someone's a teacher or a student. And the other thing that we're doing
+that's effectively a substitute for this primary key is we're saying our primary
+key is actually two columns together. And it's the combination. So this forces it to be unique. But it's really the combination of
+user_id and course_id must be unique. Okay? So let's take a look at this. Let's actually go ahead and run some code. And so what I'm going to suggest that you do
+is to start with a brand new fresh database. Just click New Database. Right? And we're going to call this,
+I'll call it sql3, New Database. And, I'm not going to do my table there,
+I'm going to go over Execute SQL, which by now I hope
+is coming somewhat comfortable to you. And then, I'm going to grab. Actually, I'm going to grab these two. First we'll grab those two
+CREATE TABLE statements. I'll put a semicolon at the end of
+this one so we can run them both. Let's see if they worked. Yep, I've got a course and user,
+primary key, title, id, name, just exactly what we've got. And so now what we're going
+to do is we are going to execute the SQL to make
+the little connector table. So I'll paste that in,
+and I will run that. Let's see if it worked, and it did work. So we're all good, primary key. And now we're going to put some data in. So let's take a look at some data. When we're done, we've got that,
+which we've seen. And so we're going to insert some users and
+some courses, so let's take a look at that
+before we go doing it. So because these have auto
+increment primary keys and we're just going to insert the name
+and the email jane@tsugi.org and we're going to insert three users and
+then we're going to get the user id's and then we're going to insert three courses,
+Python, SQL, and PHP. So we'll just do those. Those are nothing special. They're no different than the things
+we've been doing all along. Go over here in SQL. They all have semicolons at the end. So it all ran, so we'll browse the data. We see the course data. And we see the user data. And there's nothing in
+the membership data. I mean, the database doesn't know
+that we've done anything like this. We just inserted some stuff over here. And what we're really doing is
+establishing the primary key in this id column. So Python is 1. SQL is 2 and PHP is 3. And so now we're going to actually put
+some data into the member column, and the user_id, course_id, role. So we're connecting one
+user to one course, and then assigning a role to
+that particular membership. So this is a membership record, who is
+a member of what and some aspect of it. And there can be a few things that are often a few more columns
+that you could do. So let's take a look at the thing
+we've got to do to actually insert users into the courses. Right? So here's the numbers that we've got. And so now what we're going to do is insert into, there we go, insert into the member
+table the enrollment records, as it were. So we've got to insert user_id, course_id,
+foreign keys, and then the role. And so this says, we're going to do user 1
+is going to be in course 1, and we'll make 1 be the instructor, okay? And then we're saying user 2 is in course 1 as a student. User 3 is in course 1 as a student. User 1 is course 2 as a student. User 2 is in course 2 as an instructor. Etc., etc., etc. And so because we know what
+these numbers are in actual code we'll know what the numbers are. We know what the numbers are, and so we sort of put them right
+in the insert statements. And that's how we make our connections. So let's go ahead and run those, go to SQL and insert all those. Click. Oh yikes, hope I didn't do that twice. Nope, I didn't do it twice. I'm glad. Let me just refresh to make
+sure I didn't do it twice. Okay, so that's just the numbers that
+came from those insert statements and instructor, instructor, instructor,
+the courses, and the students. Okay? And so now what we have is we have in our database, we have now
+connected these things together. Right?
+So we've got them all connected together. We've got our User table,
+we've got our Ccourse table, and then we've got our connectors that go
+from here to here and here to here. And we are modeling
+a little tiny bit of data on the connection, is what we'd call that. On the connection, okay? So, let's get some data
+out of this table now. We are going to write a select statement,
+SELECT User.name, Member.role, and then Course.title. We're going to select those from the User, joined with the Member,
+joined with the Course, so we're going to join all those
+together into one big long row. We use the ON clause and the
+Member.user_id is equal to the user's id and the members and the courses, the membership
+course id is equal to the course's id. Member.course_id equals the course's id. Oh and then we're going to do cool stuff. We're going to order by the course
+title then the member role. The way these. And then member role descending and
+then the user name. So what this means is, the precedence is
+course title's the most important thing. The role's the next most important thing. And we're going to do that descending and then the user name is the third
+most important thing. So this is going to give us
+sorted by course first and then within course it's role first, and
+then for people that have the same role like this one has the same role, so this
+allows us to see the teachers first and then the students in alphabetical order
+because the role in 1 for teachers and 0 for students, okay? So that's what we get when
+we make this join, and so we've kind of created
+an enrollment record. If we had a WHERE clause we could pick
+it for one particular course, etc., etc. So let's go ahead and run that select. It will be really boring
+if everything went well. Execute SQL. Paste that SQL in. And run that SQL. And so we see ordered by course,
+then ordered by role, and then within the same role
+it's ordered by student name. Okay? So that was an example of
+three things in the ORDER BY clause. Okay. So, you see this sort of working if you look at various data models. This happens to be a data model for
+your autograder actually. It uses a piece of software called Tsugi. And the interaction between
+the learning system and Tsugi has to model things like
+what course you're coming from, the membership you are, whether you're a
+teacher or not, and so if I look at this, not that you really need to look at
+this in great detail, we got this is a production software, a User table,
+a Context which is the same as course, and then the Membership, and the Membership
+has a many, many-to-one, one. So we have a many-to-many relationship
+between users and courses, but we model it with this little table
+that's the connector table. And, here's a role in there. As you might expect in any teaching and
+learning environment, you're going to keep track of the role. And
+I have a thing called the role override. And I also have two little things that
+keep track of when things happen. And so let's see. So some of these. Some of these. So that's a many-to-many relationship. Most of these other
+things are many-to-one. This is a many-to-one relationship. And so this is a modified crow's foot. This is a many-to-one relationship
+between the course link. This happens to be the link
+that you click on. Blah blah blah blah blah. And this is actually your grade. And results are great, and so
+there's many results for one link, and that's because every
+student gets their own grade. Okay, so this just happens to be
+the data model for this piece of software you have now been
+using, perhaps, for several months. But you see one of these
+many-to-many relationships. Okay. So, why did we do all this? Why did we do all of these things? Why did we make these little integers?
+Why did we take you about JOIN? Why did we teach about many-to-many? Why did we make your data look so
+crazy? And that is all about speed. And you might say I
+don't care about speed. And it turns out that there
+are plenty of programs for which you don't care about speed. You know, the little program
+to calculate the US floor from the Europe floor. It doesn't matter. Reading 10,000 lines from a file doesn't
+matter. But when you build a SAN online application or even a large data analysis
+application, speed begins to matter. And so what happens is you cross over this
+moment where it become too slow. And then the only way to make it go
+fast is to really make it go fast. And so when you use databases you can
+do things that seem amazingly fast. And so all this normalization,
+the amount of data that you store, the amount of data you
+scan, is really taken out. And it's not really a trade-off. Either your thing is small enough that you
+don't have to do this, or you cross over this point where your application
+will fail unless you don't do this. And so that's why this is an important skill to have. So, we've covered a lot of SQL
+in a short period of time. There's much more to learn. People always ask me,
+is there an advanced SQL class, and I'm like, well it's kind of a beginning
+SQL class and then the rest of your life. Because you can always learn more
+about Structured Query Language, and how databases work, and what goes fast,
+and what doesn't go fast. A couple things that you can look for as topics that we really
+didn't cover very well. Indexes, this has to do with like logical
+keys and lookups really fast for strings. Constraints. We did have a thing not null. There's other constraints
+that you can put on data. And transactions. They're a way to group operations,
+like if a read starts, no more reads until a write happens. And so it's a way of blocking things, and
+so these are all very, very important topics. And so, relational databases could
+be a profession all by itself. Just knowing how to do
+databases is impressive. Doing database design is impressive. And I hope this has gotten you to
+the point where you can somewhat understand what's going on, and
+then, learn the rest of your life. Okay? See you.

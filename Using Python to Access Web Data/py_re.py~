@@ -1,0 +1,4 @@
+
+import re
+
+filehandle=open('regex_sum_42.txt',r)
